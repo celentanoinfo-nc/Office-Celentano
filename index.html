@@ -116,7 +116,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(26,58,42,.03);}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;width:100%;max-width:460px;max-height:92vh;overflow-y:auto;border-top:3px solid var(--gold);box-shadow:0 20px 60px rgba(0,0,0,.3);}
 .modal-title{font-family:'Playfair Display',serif;font-size:17px;color:var(--green);margin-bottom:18px;}
 .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;}
-.request-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:9px;display:flex;align-items:center;gap:12px;}
+.request-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:9px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .check-box{width:28px;height:28px;border-radius:6px;border:2px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;font-size:16px;}
 .check-box.checked{background:var(--success);border-color:var(--success);color:#fff;}
 .request-info{flex:1;min-width:0;}
@@ -215,7 +215,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     </div>
     <div class="error-msg" id="login-error">Falscher PIN.</div>
     <button class="btn btn-primary" onclick="doLogin()">Einloggen</button>
-    <div class="text-muted" style="font-size:11px;margin-top:12px">Nicola: <span class="mono" style="color:var(--gold)">0904</span> &nbsp;|&nbsp; Elena: <span class="mono" style="color:var(--gold)">1310</span> &nbsp;|&nbsp; Gast: <span class="mono" style="color:var(--gold)">1234</span></div>
+    <div class="text-muted" style="font-size:11px;margin-top:12px"></div>
     <hr style="border:none;border-top:1px solid var(--border);margin:18px 0">
     <div style="font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Google Verbindung</div>
     <input type="text" id="url-input-login" placeholder="https://script.google.com/macros/s/..."
@@ -689,7 +689,19 @@ function renderDashboard(){
   const el=document.getElementById('low-stock-list');
   if(!low.length){el.innerHTML='<div class="text-muted" style="padding:10px 0">Alle Artikel ausreichend vorhanden.</div>';return;}
   el.innerHTML='';
-  low.forEach(a=>{const d=document.createElement('div');d.className='request-item';d.innerHTML=`<div class="request-info"><div class="request-name">${a.name} <span class="tag tag-gold">${a.kat}</span></div><div class="request-meta">Bestand: <span class="stock-low">${a.bestand}</span> / Min: ${a.min} · ${a.id}</div></div><button class="btn btn-primary btn-sm" onclick="quickNb('${a.id}')">Anfordern</button>`;el.appendChild(d);});
+  low.forEach(a=>{
+    const d=document.createElement('div');
+    d.style.cssText='background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:9px;';
+    d.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:14px;color:var(--green)">${a.name} <span class="tag tag-gold">${a.kat}</span></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px">Bestand: <span class="stock-low">${a.bestand}</span> / Min: ${a.min} · ${a.id}</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="quickNb('${a.id}')" style="flex-shrink:0;width:auto">Anfordern</button>
+      </div>`;
+    el.appendChild(d);
+  });
 }
 
 function fl(list,qId,nrId,katId){
@@ -704,7 +716,7 @@ function renderArtikel(){
   const tbody=document.getElementById('artikel-tbody');if(!tbody)return;tbody.innerHTML='';
   if(!list.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Keine Artikel.</td></tr>';return;}
   list.forEach(a=>{const cls=a.bestand<a.min?'stock-low':a.bestand<a.min*1.5?'stock-med':'stock-ok';
-    const tr=document.createElement('tr');tr.innerHTML=`<td data-label="Art.-Nr." class="mono">${a.id}</td><td data-label="Name" class="bold">${a.name}</td><td data-label="Kategorie"><span class="tag tag-green">${a.kat}</span></td><td data-label="Bestand/Min." class="${cls} mono">${a.bestand} / ${a.min}</td><td data-label="Aktion"><button class="btn btn-secondary btn-sm" onclick="quickNb('${a.id}')">Anfordern</button></td>`;tbody.appendChild(tr);});
+    const tr=document.createElement('tr');tr.innerHTML=`<td data-label="Art.-Nr." class="mono">${a.id}</td><td data-label="Name" class="bold">${a.name}</td><td data-label="Kategorie"><span class="tag tag-green">${a.kat}</span></td><td data-label="Bestand/Min." class="${cls} mono" style="white-space:nowrap">${a.bestand} / ${a.min}</td><td data-label="Aktion"><button class="btn btn-secondary btn-sm" onclick="quickNb('${a.id}')">Anfordern</button></td>`;tbody.appendChild(tr);});
 }
 window.addArtikel=async function(){
   const nr=document.getElementById('new-artnr').value.trim(),name=document.getElementById('new-name').value.trim();
@@ -730,7 +742,20 @@ function renderNbSearch(){
   if(!q&&!nbAktiveKat){el.innerHTML='<div class="text-muted" style="font-size:12px">Kategorie wählen oder Artikel suchen…</div>';return;}
   if(!list.length){el.innerHTML='<div class="text-muted">Keine Artikel gefunden.</div>';return;}
   el.innerHTML='';
-  list.slice(0,15).forEach(a=>{const d=document.createElement('div');d.className='request-item';d.innerHTML=`<div class="request-info"><div class="request-name">${a.name} <span class="mono" style="color:var(--muted)">${a.id}</span></div><div class="request-meta"><span class="tag tag-green">${a.kat}</span> &nbsp;Bestand: <span class="${a.bestand<a.min?'stock-low':''}">${a.bestand}</span> / Min: ${a.min}</div></div><button class="btn btn-primary btn-sm" onclick="quickNb('${a.id}')">Anfordern</button>`;el.appendChild(d);});
+  list.slice(0,15).forEach(a=>{
+    const d=document.createElement('div');
+    d.style.cssText='background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:9px;';
+    d.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:14px;color:var(--green);margin-bottom:4px">${a.name}</div>
+          <div style="font-size:12px;color:var(--muted)">${a.id} · <span class="tag tag-green">${a.kat}</span></div>
+          <div style="font-size:12px;margin-top:4px">Bestand: <span class="${a.bestand<a.min?'stock-low':''}">${a.bestand}</span> / Min: ${a.min}</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="quickNb('${a.id}')" style="flex-shrink:0;margin-top:0;width:auto">Anfordern</button>
+      </div>`;
+    el.appendChild(d);
+  });
 }
 function renderNbOpen(){
   const el=document.getElementById('nb-open-list');if(!el)return;
@@ -829,7 +854,7 @@ function renderArtikelL(){
   const tbody=document.getElementById('l-artikel-tbody');if(!tbody)return;tbody.innerHTML='';
   if(!list.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Keine Artikel.</td></tr>';return;}
   list.forEach(a=>{const cls=a.bestand<a.min?'stock-low':a.bestand<a.min*1.5?'stock-med':'stock-ok';
-    const tr=document.createElement('tr');tr.innerHTML=`<td data-label="Art.-Nr." class="mono">${a.id}</td><td data-label="Name" class="bold">${a.name}</td><td data-label="Kat."><span class="tag tag-green">${a.kat}</span></td><td data-label="Bestand/Min." class="${cls} mono">${a.bestand} / ${a.min}</td><td data-label="Löschen"><button class="btn btn-danger btn-sm" onclick="deleteArtikel('${a.id}')">Löschen</button></td>`;tbody.appendChild(tr);});
+    const tr=document.createElement('tr');tr.innerHTML=`<td data-label="Art.-Nr." class="mono">${a.id}</td><td data-label="Name" class="bold">${a.name}</td><td data-label="Kat."><span class="tag tag-green">${a.kat}</span></td><td data-label="Bestand/Min." class="${cls} mono" style="white-space:nowrap">${a.bestand} / ${a.min}</td><td data-label="Löschen"><button class="btn btn-danger btn-sm" onclick="deleteArtikel('${a.id}')">Löschen</button></td>`;tbody.appendChild(tr);});
 }
 window.addArtikelL=async function(){
   const nr=document.getElementById('l-new-artnr').value.trim(),name=document.getElementById('l-new-name').value.trim();
@@ -875,7 +900,7 @@ function renderLieferanten(){
         <td data-label="Art.-Nr." class="mono">${a.id}</td>
         <td data-label="Name" class="bold">${a.name}</td>
         <td data-label="Kategorie"><span class="tag tag-green">${a.kat}</span></td>
-        <td data-label="Bestand/Min." class="${cls} mono">${a.bestand} / ${a.min}</td>
+        <td data-label="Bestand/Min." class="${cls} mono" style="white-space:nowrap">${a.bestand} / ${a.min}</td>
       </tr>`;
     }).join('');
     card.innerHTML=`
